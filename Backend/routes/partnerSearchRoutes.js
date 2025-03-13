@@ -4,7 +4,7 @@ const Profile = require("../models/Profile");
 const authenticateToken = require("../middleware/authenticateToken");
 // const OpenAI = require("openai");
 const mongoose = require("mongoose");
-const axios = require("axios"); // 添加 axios 用于 API 请求
+const { spawn } = require("child_process"); // 用于调用 Python 脚本
 require("dotenv").config();
 
 // Define Organization model (only once)
@@ -188,48 +188,70 @@ router.post("/search", authenticateToken, async (req, res) => {
 //   }
 // }
 
-// 新的匹配函数 - 使用外部 API
-async function findMatchesUsingExternalAPI(userProfile) {
-  try {
-    // 准备发送到外部 API 的数据
-    const requestData = {
-      Name: userProfile.orgName || "Unknown Organization",
-      Type: userProfile.orgType || "Non Profit",
-      Description: userProfile.mission_statement || "",
-      "Target Audience": userProfile.target_audience || "",
-      "Organization looking 1": userProfile.preferredOrgType || "Non Profit",
-      "Organization looking 2":
-        userProfile.partnerDescription ||
-        userProfile.partnerSearch?.partnershipGoal ||
-        "",
-    };
+// 使用 Python 脚本调用外部 API 进行匹配
+async function findMatchesUsingPythonScript(userProfile) {
+  return new Promise((resolve, reject) => {
+    try {
+      console.log("Calling Python script with user profile data");
 
-    console.log("Sending data to external API:", requestData);
+      // 调用 Python 脚本，不传递参数，使用脚本中的示例数据
+      const pythonProcess = spawn("python3", ["./matching_api.py"]);
 
-    // 调用外部 API
-    const response = await axios.post(
-      `${EXTERNAL_API_URL}/test/complete-matching-process`,
-      requestData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      let dataString = "";
+      let errorString = "";
 
-    // 返回匹配结果
-    return response.data;
-  } catch (error) {
-    console.error("Error calling external matching API:", error);
-    throw error;
-  }
+      // 收集标准输出
+      pythonProcess.stdout.on("data", (data) => {
+        dataString += data.toString();
+      });
+
+      // 收集标准错误
+      pythonProcess.stderr.on("data", (data) => {
+        errorString += data.toString();
+        console.error(`Python stderr: ${data}`);
+      });
+
+      // 脚本执行完成
+      pythonProcess.on("close", (code) => {
+        if (code !== 0) {
+          console.error(`Python script exited with code ${code}`);
+          console.error(`Error: ${errorString}`);
+          reject(
+            new Error(`Python script failed with code ${code}: ${errorString}`)
+          );
+          return;
+        }
+
+        try {
+          // 尝试从输出中提取 JSON
+          const responseMatch = dataString.match(/Response:\s*(\{[\s\S]*\})/);
+          if (responseMatch && responseMatch[1]) {
+            const jsonStr = responseMatch[1];
+            const result = JSON.parse(jsonStr);
+            resolve(result);
+          } else {
+            console.error("Could not find JSON in Python output");
+            console.error("Raw output:", dataString);
+            reject(new Error("Could not parse Python script output"));
+          }
+        } catch (error) {
+          console.error("Failed to parse Python script output:", error);
+          console.error("Raw output:", dataString);
+          reject(error);
+        }
+      });
+    } catch (error) {
+      console.error("Error executing Python script:", error);
+      reject(error);
+    }
+  });
 }
 
 // Execute partner search
 router.post("/find-partners", authenticateToken, async (req, res) => {
   try {
     console.log(
-      "Starting partner search with new algorithm, parameters:",
+      "Starting partner search with Python script, parameters:",
       req.body
     );
     const { location, organizationType, partnershipGoal } = req.body;
@@ -253,28 +275,83 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
       };
     }
 
-    // 使用新的外部 API 匹配方法
-    const matchResults = await findMatchesUsingExternalAPI(userProfile);
-    console.log("External API match results:", matchResults);
+    // 使用 Python 脚本调用外部 API 进行匹配
+    const matchResults = await findMatchesUsingPythonScript(userProfile);
+
+    // 使用 JSON.stringify 打印完整的匹配结果，但限制深度为 2 层
+    console.log(
+      "External API match results summary:",
+      JSON.stringify(matchResults, null, 2)
+    );
+
+    // 打印成功匹配的组织详情
+    if (
+      matchResults.matching_results &&
+      matchResults.matching_results.successful_matches
+    ) {
+      console.log(
+        "成功匹配的组织:",
+        JSON.stringify(
+          matchResults.matching_results.successful_matches,
+          null,
+          2
+        )
+      );
+    }
+
+    // 打印最终的 20 个匹配结果中的前 3 个
+    if (
+      matchResults.matching_results &&
+      matchResults.matching_results.final_twenty_matches
+    ) {
+      console.log(
+        "最终匹配结果前 3 个:",
+        JSON.stringify(
+          matchResults.matching_results.final_twenty_matches.slice(0, 3),
+          null,
+          2
+        )
+      );
+    }
 
     // 处理匹配结果
     let formattedResults = [];
     if (
       matchResults &&
-      matchResults.matches &&
-      Array.isArray(matchResults.matches)
+      matchResults.matching_results &&
+      matchResults.matching_results.final_twenty_matches &&
+      Array.isArray(matchResults.matching_results.final_twenty_matches)
     ) {
-      formattedResults = matchResults.matches.map((match) => ({
-        ...match,
-        _id: match.id || mongoose.Types.ObjectId().toString(), // 确保每个结果有唯一 ID
-        matchCategory: "✅ Good Match", // 简化匹配类别
-        matchScore: 80, // 默认匹配分数
-        Name: match.name || match.Name || "Unknown Organization",
-        Description: match.description || match.Description || "",
-        City: match.location || match.city || location || "",
-        State: match.state || "",
-        Organization_Type: match.type || match.Type || organizationType,
-      }));
+      formattedResults = matchResults.matching_results.final_twenty_matches.map(
+        (match) => ({
+          ...match,
+          _id:
+            match.organization?.id || new mongoose.Types.ObjectId().toString(), // 使用 new 关键字创建 ObjectId
+          matchCategory:
+            match.evaluation?.is_match === true
+              ? "✅ Good Match"
+              : "🟡 Average Match", // 根据评估结果设置匹配类别
+          matchScore: Math.round(match.similarity_score * 100) || 80, // 使用相似度分数
+          Name: match.organization?.name || "Unknown Organization",
+          Description: match.organization?.description || "",
+          City: match.organization?.city || location || "",
+          State: match.organization?.state || "",
+          Organization_Type: match.organization?.type || organizationType,
+          linkedin_url: match.organization?.linkedin_url || "",
+          URL: match.organization?.url || "",
+          linkedin_industries: match.organization?.industries || "",
+          linkedin_specialities: match.organization?.specialities || "",
+        })
+      );
+    }
+
+    // 打印格式化后的结果
+    console.log(`格式化后的匹配结果 (${formattedResults.length} 个):`);
+    if (formattedResults.length > 0) {
+      console.log(
+        "第一个匹配结果示例:",
+        JSON.stringify(formattedResults[0], null, 2)
+      );
     }
 
     res.status(200).json({
@@ -290,7 +367,20 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
           organizationType,
           partnershipGoal,
         },
-        apiResponse: matchResults,
+        apiResponse: {
+          status: matchResults.status,
+          processSteps: matchResults.process_steps
+            ? Object.keys(matchResults.process_steps)
+            : [],
+          matchingResultsSummary: {
+            successfulMatchesCount:
+              matchResults.matching_results?.successful_matches?.length || 0,
+            remainingMatchesCount:
+              matchResults.matching_results?.remaining_matches?.length || 0,
+            finalMatchesCount:
+              matchResults.matching_results?.final_twenty_matches?.length || 0,
+          },
+        },
       },
     });
   } catch (error) {
@@ -307,5 +397,157 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
     });
   }
 });
+
+// 分析匹配理由的 API
+router.post(
+  "/test/analyze/match-reasons",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { user_org, match_org } = req.body;
+
+      if (!user_org || !match_org) {
+        return res.status(400).json({
+          code: 1,
+          message: "缺少必要的字段",
+        });
+      }
+
+      // 调用 OpenAI API
+      const openai = require("openai");
+      const openaiClient = new openai.OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const prompt = `
+    Based on the following information, explain why these organizations would be good partners:
+    
+    User Organization:
+    - Description: ${user_org.Description || "N/A"}
+    - Target Audience: ${user_org.Target_Audience || "N/A"}
+    
+    Potential Partner:
+    - Name: ${match_org.name || "N/A"}
+    - Description: ${match_org.description || "N/A"}
+    - Type: ${match_org.type || "N/A"}
+    - Industries: ${match_org.industries || "N/A"}
+    - Specialties: ${match_org.specialities || "N/A"}
+    
+    Please provide 2-3 key points about why this would be a good partnership.
+    Focus on:
+    1. Strategic alignment and shared values
+    2. Complementary capabilities and resources
+    3. Market and audience synergies
+    
+    Format your response with clear section headers followed by bullet points. For example:
+    
+    - Strategic Alignment and Shared Values:
+    - Both organizations focus on environmental sustainability.
+    - They share a commitment to community education.
+    
+    - Complementary Capabilities and Resources:
+    - Organization A has strong digital presence while Organization B has established community networks.
+    
+    - Market and Audience Synergies:
+    - Both target environmentally conscious consumers in urban areas.
+    `;
+
+      const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are an expert in analyzing organizational partnerships. Format your response with clear section headers followed by bullet points.",
+          },
+          { role: "user", content: prompt },
+        ],
+      });
+
+      return res.json({
+        status: "success",
+        analysis: response.choices[0].message.content.trim(),
+      });
+    } catch (error) {
+      console.error("分析匹配理由错误:", error);
+      return res.status(500).json({
+        code: 1,
+        message: "分析匹配理由失败",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// 分析匹配风险的 API
+router.post(
+  "/test/analyze/match-risks",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { user_org, match_org } = req.body;
+
+      if (!user_org || !match_org) {
+        return res.status(400).json({
+          code: 1,
+          message: "缺少必要的字段",
+        });
+      }
+
+      // 调用 OpenAI API
+      const openai = require("openai");
+      const openaiClient = new openai.OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const prompt = `
+    Based on the following information, identify potential challenges or risks in this partnership:
+    
+    User Organization:
+    - Description: ${user_org.Description || "N/A"}
+    - Target Audience: ${user_org.Target_Audience || "N/A"}
+    
+    Potential Partner:
+    - Name: ${match_org.name || "N/A"}
+    - Description: ${match_org.description || "N/A"}
+    - Type: ${match_org.type || "N/A"}
+    - Industries: ${match_org.industries || "N/A"}
+    - Specialties: ${match_org.specialities || "N/A"}
+    
+    Please identify 2-3 potential challenges or risks that might arise in this partnership.
+    Consider:
+    1. Misalignment in organizational values or goals
+    2. Resource constraints or operational challenges
+    3. Market positioning or audience conflicts
+    
+    Format your response in clear, concise bullet points.
+    `;
+
+      const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are an expert in analyzing organizational partnerships.",
+          },
+          { role: "user", content: prompt },
+        ],
+      });
+
+      return res.json({
+        status: "success",
+        analysis: response.choices[0].message.content.trim(),
+      });
+    } catch (error) {
+      console.error("分析匹配风险错误:", error);
+      return res.status(500).json({
+        code: 1,
+        message: "分析匹配风险失败",
+        error: error.message,
+      });
+    }
+  }
+);
 
 module.exports = router;

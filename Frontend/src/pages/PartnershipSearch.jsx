@@ -410,9 +410,6 @@ const PartnershipSearch = () => {
                     <option value="forprofit" className="text-gray-900">
                       For-profit
                     </option>
-                    <option value="social" className="text-gray-900">
-                      Social Enterprise
-                    </option>
                   </select>
                 </div>
               </div>
