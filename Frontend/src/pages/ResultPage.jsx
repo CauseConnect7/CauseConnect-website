@@ -319,7 +319,7 @@ export default function ResultPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-r from-teal-50 to-blue-50">
       {/* 顶部导航栏 */}
       <div
         className="App-header"
@@ -818,99 +818,277 @@ export default function ResultPage() {
                 </div>
 
                 {selectedOrganization && (
-                  <div className="space-y-6">
+                  <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-180px)] pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                     {/* 组织名称和匹配分数 */}
-                    <div className="flex justify-between items-start bg-gray-50 p-4 rounded-lg shadow-sm">
-                      <h3 className="text-xl font-semibold text-gray-900 pr-4 flex-1">
-                        {selectedOrganization.Name ||
-                          selectedOrganization.name ||
-                          "未知组织"}
-                      </h3>
-                      {selectedOrganization.matchCategory && (
-                        <span
-                          className="px-4 py-1.5 text-sm rounded-full font-medium shadow-sm whitespace-nowrap min-w-[120px] text-center flex-shrink-0"
-                          style={{
-                            backgroundColor: `${getColorByCategory(
-                              selectedOrganization.matchCategory
-                            )}20`,
-                            color: getColorByCategory(
-                              selectedOrganization.matchCategory
-                            ),
-                          }}
+                    <div className="bg-gradient-to-r from-gray-50 to-white p-5 rounded-xl shadow-sm border border-gray-100">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 pr-4 flex-1">
+                          {selectedOrganization.Name ||
+                            selectedOrganization.name ||
+                            "未知组织"}
+                        </h3>
+                        {selectedOrganization.matchCategory && (
+                          <span
+                            className="px-4 py-1.5 text-sm rounded-full font-medium shadow-sm whitespace-nowrap min-w-[120px] text-center flex-shrink-0"
+                            style={{
+                              backgroundColor: `${getColorByCategory(
+                                selectedOrganization.matchCategory
+                              )}20`,
+                              color: getColorByCategory(
+                                selectedOrganization.matchCategory
+                              ),
+                            }}
+                          >
+                            {selectedOrganization.matchCategory}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 匹配分数 - 集成到顶部卡片 */}
+                      <div className="mt-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">
+                            Match Score
+                          </span>
+                          <div className="flex items-center">
+                            <span
+                              className="text-2xl font-bold"
+                              style={{
+                                color: getColorByCategory(
+                                  selectedOrganization.matchCategory
+                                ),
+                              }}
+                            >
+                              {selectedOrganization.matchScore}%
+                            </span>
+                            <svg
+                              className="w-5 h-5 ml-1"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                              style={{
+                                color: getColorByCategory(
+                                  selectedOrganization.matchCategory
+                                ),
+                              }}
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                          <div
+                            className="h-3 rounded-full transition-all duration-1000 ease-out"
+                            style={{
+                              width: `${selectedOrganization.matchScore}%`,
+                              backgroundColor: getColorByCategory(
+                                selectedOrganization.matchCategory
+                              ),
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 基本信息 - 移到前面并改进UI */}
+                    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                      <div className="flex items-center mb-4 pb-2 border-b border-gray-100">
+                        <svg
+                          className="w-5 h-5 text-gray-700 mr-2"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          {selectedOrganization.matchCategory}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* 匹配分数 */}
-                    <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                      <div className="flex justify-between mb-3">
-                        <span className="text-base font-semibold text-gray-800">
-                          Match Score
-                        </span>
-                        <span className="text-lg font-bold text-gray-900">
-                          {selectedOrganization.matchScore}%
-                        </span>
+                          <path
+                            d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M6 21V19C6 17.9391 6.42143 16.9217 7.17157 16.1716C7.92172 15.4214 8.93913 15 10 15H14C15.0609 15 16.0783 15.4214 16.8284 16.1716C17.5786 16.9217 18 17.9391 18 19V21"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <h4 className="text-base font-semibold text-gray-800">
+                          Basic Information
+                        </h4>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div
-                          className="h-3 rounded-full"
-                          style={{
-                            width: `${selectedOrganization.matchScore}%`,
-                            backgroundColor: getColorByCategory(
-                              selectedOrganization.matchCategory
-                            ),
-                          }}
-                        ></div>
-                      </div>
-                    </div>
 
-                    {/* 基本信息 */}
-                    <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                      <h4 className="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                        Basic Information
-                      </h4>
-                      <div className="grid grid-cols-2 gap-5">
-                        <div className="bg-gray-50 p-3 rounded-md">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-                            Location
-                          </p>
-                          <p className="text-sm font-medium text-gray-900">
-                            {selectedOrganization.City
-                              ? `${selectedOrganization.City}, `
-                              : ""}
-                            {selectedOrganization.State || "未知"}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded-md">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-                            Organization Type
-                          </p>
-                          <p className="text-sm font-medium text-gray-900">
-                            {selectedOrganization.Organization_Type ||
-                              selectedOrganization.type ||
-                              "未知"}
-                          </p>
-                        </div>
+                      <div className="flex flex-wrap gap-3">
+                        {/* 位置标签 */}
+                        {selectedOrganization.City ||
+                        selectedOrganization.State ? (
+                          <div className="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 transition-colors rounded-full">
+                            <svg
+                              className="w-3.5 h-3.5 text-gray-500 mr-1.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M12 22C16 18 20 14.4183 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 14.4183 8 18 12 22Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <span className="text-xs font-medium text-gray-700">
+                              {selectedOrganization.City
+                                ? `${selectedOrganization.City}, `
+                                : ""}
+                              {selectedOrganization.State || "未知"}
+                            </span>
+                          </div>
+                        ) : null}
+
+                        {/* 组织类型标签 */}
+                        {selectedOrganization.Organization_Type ||
+                        selectedOrganization.type ? (
+                          <div className="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 transition-colors rounded-full">
+                            <svg
+                              className="w-3.5 h-3.5 text-blue-500 mr-1.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M3 9H21"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M9 21V9"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <span className="text-xs font-medium text-blue-700">
+                              {selectedOrganization.Organization_Type ||
+                                selectedOrganization.type ||
+                                "未知"}
+                            </span>
+                          </div>
+                        ) : null}
+
+                        {/* 员工数量标签 */}
                         {selectedOrganization.staff_count && (
-                          <div className="bg-gray-50 p-3 rounded-md">
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-                              Staff Count
-                            </p>
-                            <p className="text-sm font-medium text-gray-900">
-                              {selectedOrganization.staff_count}
-                            </p>
+                          <div className="inline-flex items-center px-3 py-1.5 bg-purple-50 hover:bg-purple-100 transition-colors rounded-full">
+                            <svg
+                              className="w-3.5 h-3.5 text-purple-500 mr-1.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <span className="text-xs font-medium text-purple-700">
+                              {selectedOrganization.staff_count} Employees
+                            </span>
                           </div>
                         )}
+
+                        {/* 行业标签 */}
                         {selectedOrganization.linkedin_industries && (
-                          <div className="bg-gray-50 p-3 rounded-md">
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-                              Industry
-                            </p>
-                            <p className="text-sm font-medium text-gray-900">
+                          <div className="inline-flex items-center px-3 py-1.5 bg-green-50 hover:bg-green-100 transition-colors rounded-full">
+                            <svg
+                              className="w-3.5 h-3.5 text-green-500 mr-1.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M16 8.5C16 8.5 14.5 7 12 7C9.5 7 8 8.5 8 8.5"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M8 15.5C8 15.5 9.5 17 12 17C14.5 17 16 15.5 16 15.5"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M12 7V17"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M8 12H16"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <span className="text-xs font-medium text-green-700">
                               {selectedOrganization.linkedin_industries}
-                            </p>
+                            </span>
                           </div>
                         )}
                       </div>
@@ -919,10 +1097,54 @@ export default function ResultPage() {
                     {/* 描述 */}
                     {(selectedOrganization.Description ||
                       selectedOrganization.description) && (
-                      <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                        <h4 className="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                          Organization Description
-                        </h4>
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <div className="flex items-center mb-4 pb-2 border-b border-gray-100">
+                          <svg
+                            className="w-5 h-5 text-gray-700 mr-2"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M14 2V8H20"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M16 13H8"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M16 17H8"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M10 9H9H8"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <h4 className="text-base font-semibold text-gray-800">
+                            Organization Description
+                          </h4>
+                        </div>
                         <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
                           {selectedOrganization.Description ||
                             selectedOrganization.description}
@@ -930,65 +1152,24 @@ export default function ResultPage() {
                       </div>
                     )}
 
-                    {/* LinkedIn 描述 */}
-                    {selectedOrganization.linkedin_description && (
-                      <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                        <h4 className="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                          LinkedIn Description
+                    {/* 匹配建议 - 移到后面 */}
+                    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                      <div className="flex items-center mb-4 pb-2 border-b border-gray-100">
+                        <svg
+                          className="w-5 h-5 text-teal-500 mr-2"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <h4 className="text-base font-semibold text-gray-800">
+                          Partnership Insights
                         </h4>
-                        <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-                          {selectedOrganization.linkedin_description}
-                        </p>
                       </div>
-                    )}
-
-                    {/* 标签 */}
-                    {selectedOrganization.tags && (
-                      <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                        <h4 className="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                          Tags
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedOrganization.tags
-                            .split(",")
-                            .map((tag, index) => (
-                              <span
-                                key={index}
-                                className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded-full font-medium"
-                              >
-                                {tag.trim()}
-                              </span>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 专业领域 */}
-                    {selectedOrganization.linkedin_specialities && (
-                      <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                        <h4 className="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                          Specialties
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedOrganization.linkedin_specialities
-                            .split(",")
-                            .map((specialty, index) => (
-                              <span
-                                key={index}
-                                className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs rounded-full font-medium"
-                              >
-                                {specialty.trim()}
-                              </span>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 匹配建议 */}
-                    <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                      <h4 className="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                        Partnership Suggestions
-                      </h4>
                       {loadingSuggestions ? (
                         <div className="flex items-center justify-center py-6">
                           <svg
@@ -1013,26 +1194,122 @@ export default function ResultPage() {
                           </svg>
                         </div>
                       ) : matchSuggestions ? (
-                        <div className="bg-teal-50 p-4 rounded-lg border border-teal-100">
+                        <div className="bg-gradient-to-r from-teal-50 to-blue-50 p-4 rounded-lg border border-teal-100">
                           <div className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
                             {matchSuggestions}
                           </div>
                         </div>
                       ) : (
-                        <div className="text-sm text-gray-500 italic py-4 text-center">
+                        <div className="flex items-center justify-center py-4 text-sm text-gray-500 italic">
+                          <svg
+                            className="animate-pulse w-5 h-5 mr-2 text-teal-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                           Analyzing potential partnership opportunities...
                         </div>
                       )}
                     </div>
 
+                    {/* LinkedIn 描述 */}
+                    {selectedOrganization.linkedin_description && (
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <div className="flex items-center mb-4 pb-2 border-b border-gray-100">
+                          <svg
+                            className="w-5 h-5 text-blue-600 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M17.5 0h-15A2.5 2.5 0 000 2.5v15A2.5 2.5 0 002.5 20h15a2.5 2.5 0 002.5-2.5v-15A2.5 2.5 0 0017.5 0zM6 17H3V8h3v9zM4.5 6.3a1.8 1.8 0 110-3.6 1.8 1.8 0 010 3.6zm12.5 11h-3v-5.6c0-3.4-4-3.1-4 0V17H7V8h3v1.8c1.4-2.6 7-2.8 7 2.5V17z" />
+                          </svg>
+                          <h4 className="text-base font-semibold text-gray-800">
+                            LinkedIn Description
+                          </h4>
+                        </div>
+                        <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                          {selectedOrganization.linkedin_description}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* 标签 */}
+                    {selectedOrganization.tags && (
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <div className="flex items-center mb-4 pb-2 border-b border-gray-100">
+                          <svg
+                            className="w-5 h-5 text-yellow-500 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <h4 className="text-base font-semibold text-gray-800">
+                            Tags
+                          </h4>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedOrganization.tags
+                            .split(",")
+                            .map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded-full font-medium hover:bg-gray-200 transition-colors"
+                              >
+                                {tag.trim()}
+                              </span>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 专业领域 */}
+                    {selectedOrganization.linkedin_specialities && (
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <div className="flex items-center mb-4 pb-2 border-b border-gray-100">
+                          <svg
+                            className="w-5 h-5 text-purple-500 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                          </svg>
+                          <h4 className="text-base font-semibold text-gray-800">
+                            Specialties
+                          </h4>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedOrganization.linkedin_specialities
+                            .split(",")
+                            .map((specialty, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs rounded-full font-medium hover:bg-blue-100 transition-colors"
+                              >
+                                {specialty.trim()}
+                              </span>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* 链接 */}
-                    <div className="flex gap-4 pt-4 mt-2">
+                    <div className="flex gap-4 pt-4 mt-2 sticky bottom-0 bg-white bg-opacity-90 backdrop-blur-sm p-4 rounded-lg shadow-md z-10">
                       {selectedOrganization.URL && (
                         <a
                           href={selectedOrganization.URL}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-1"
+                          className="flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex-1 shadow-sm hover:shadow"
                         >
                           <svg
                             className="w-4 h-4 mr-2"
@@ -1055,7 +1332,7 @@ export default function ResultPage() {
                           href={selectedOrganization.linkedin_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-1"
+                          className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex-1 shadow-sm hover:shadow"
                         >
                           <svg
                             className="w-4 h-4 mr-2"

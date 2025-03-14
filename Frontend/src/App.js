@@ -692,22 +692,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/partnership-search"
-            element={
-              <ProtectedRoute>
-                <PartnershipSearch />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/results"
-            element={
-              <ProtectedRoute>
-                <ResultPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/partnership-search" element={<PartnershipSearch />} />
+          <Route path="/results" element={<ResultPage />} />
         </Routes>
       </AuthProvider>
     </Router>

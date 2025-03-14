@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import heroImage from "../images/hero4.jpg";
+import heroImage from "../images/hero2.jpg";
 import { useAuth } from "../context/AuthContext";
 
 // API 基础 URL
@@ -17,6 +17,14 @@ const PartnershipSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [profileData, setProfileData] = useState(null);
+
+  // 检查用户是否已登录
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || !user) {
+      navigate("/signin");
+    }
+  }, [user, navigate]);
 
   // 加载用户之前保存的匹配信息
   useEffect(() => {
@@ -290,12 +298,16 @@ const PartnershipSearch = () => {
         />
       </div>
 
-      {/* 返回按钮 - 更现代的设计 */}
-      <Link
-        to="/home"
-        className="absolute top-8 left-8 text-white hover:text-teal-200 z-10 flex items-center gap-2 transition-all duration-300 group"
+      {/* 返回按钮 - 更强调的设计 */}
+      <div
+        onClick={() => {
+          console.log("返回按钮被点击");
+          // 使用最直接的方式导航
+          window.location.href = "/home";
+        }}
+        className="absolute top-8 left-8 text-white hover:text-teal-100 z-20 flex items-center gap-2 transition-all duration-300 group border-none bg-teal-500/30 backdrop-blur-md px-4 py-2 rounded-full cursor-pointer hover:bg-teal-500/50 shadow-lg"
       >
-        <div className="bg-white/10 backdrop-blur-md p-2 rounded-full group-hover:bg-white/20 transition-all duration-300">
+        <div className="bg-white/20 p-2 rounded-full group-hover:bg-white/40 transition-all duration-300">
           <svg
             className="w-5 h-5"
             fill="none"
@@ -311,7 +323,7 @@ const PartnershipSearch = () => {
           </svg>
         </div>
         <span className="text-sm font-medium">Back</span>
-      </Link>
+      </div>
 
       {/* 主要内容 */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
