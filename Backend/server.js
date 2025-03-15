@@ -44,29 +44,53 @@ const app = express();
 // 中间件配置
 app.use(
   cors({
-    origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "http://localhost:3002",
-        "https://cause-connect-website-15eldiroc.vercel.app",
-        "https://cause-connect-website.vercel.app",
-        "https://causesconnect.com",
-      ];
-
-      // 允许没有origin的请求（如移动应用或Postman）
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS不允许"));
-      }
-    },
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3002",
+      "https://cause-connect-website-15eldiroc.vercel.app",
+      "https://cause-connect-website-kz9uo3014.vercel.app",
+      "https://cause-connect-website.vercel.app",
+      "https://causesconnect.com",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// 添加CORS预检请求处理中间件
+app.options("*", cors());
+
+// 添加自定义CORS头中间件
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3002",
+    "https://cause-connect-website-15eldiroc.vercel.app",
+    "https://cause-connect-website-kz9uo3014.vercel.app",
+    "https://cause-connect-website.vercel.app",
+    "https://causesconnect.com",
+  ];
+
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
