@@ -5,6 +5,7 @@ const authenticateToken = require("../middleware/authenticateToken");
 // const OpenAI = require("openai");
 const mongoose = require("mongoose");
 const { spawn } = require("child_process"); // 用于调用 Python 脚本
+const fetch = require("node-fetch"); // 如果使用fetch API
 require("dotenv").config();
 
 // Define Organization model (only once)
@@ -19,11 +20,11 @@ const Organization =
 // 根据环境选择API基础URL
 const isDevelopment = process.env.NODE_ENV === "development";
 
-export const API_BASE_URL = isDevelopment
+const API_BASE_URL = isDevelopment
   ? "http://localhost:3001/api"
   : "https://causeconnect-server.onrender.com/api";
 
-export const EXTERNAL_API_URL = "https://causeconnect-api.onrender.com";
+const EXTERNAL_API_URL = "https://causeconnect-api.onrender.com";
 
 // Configure OpenAI
 // const openai = new OpenAI({
