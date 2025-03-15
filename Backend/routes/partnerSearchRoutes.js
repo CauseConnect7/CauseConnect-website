@@ -5,7 +5,7 @@ const authenticateToken = require("../middleware/authenticateToken");
 // const OpenAI = require("openai");
 const mongoose = require("mongoose");
 const { spawn } = require("child_process"); // 用于调用 Python 脚本
-const fetch = require("node-fetch"); // 如果使用fetch API
+const axios = require("axios"); // 使用axios替代fetch
 require("dotenv").config();
 
 // Define Organization model (only once)
@@ -275,23 +275,16 @@ async function findMatchesUsingExternalAPI(userProfile) {
 
     console.log(`请求参数: ${JSON.stringify(requestBody)}`);
 
-    // 调用外部API
-    const response = await fetch(apiUrl, {
-      method: "POST",
+    // 使用axios替代fetch
+    const response = await axios.post(apiUrl, requestBody, {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestBody),
     });
 
-    if (!response.ok) {
-      throw new Error(`外部API返回错误: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("调用外部匹配API失败:", error);
+    console.error("调用外部匹配API失败:", error.message);
 
     // 使用模拟数据作为回退
     return {
