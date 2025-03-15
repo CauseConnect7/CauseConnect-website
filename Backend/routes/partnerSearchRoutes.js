@@ -266,6 +266,12 @@ async function findMatchesUsingExternalAPI(userProfile) {
     // 打印完整的userProfile以便调试
     console.log("完整的用户资料:", JSON.stringify(userProfile, null, 2));
 
+    // 打印关键字段的值
+    console.log("name字段:", userProfile.name);
+    console.log("mission_statement字段:", userProfile.mission_statement);
+    console.log("target_audience字段:", userProfile.target_audience);
+    console.log("partnerDescription字段:", userProfile.partnerDescription);
+
     // 构建更完整的请求参数，确保所有字段都有值
     const requestBody = {
       user_org: {
