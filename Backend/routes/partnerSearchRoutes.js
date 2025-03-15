@@ -263,10 +263,14 @@ async function findMatchesUsingExternalAPI(userProfile) {
 
     console.log(`调用外部匹配API: ${apiUrl}`);
 
+    // 打印完整的userProfile以便调试
+    console.log("完整的用户资料:", JSON.stringify(userProfile, null, 2));
+
+    // 构建更完整的请求参数，确保所有字段都有值
     const requestBody = {
       user_org: {
         Name: userProfile.name || "Unknown Organization",
-        Type: userProfile.orgType || "nonprofit",
+        Type: userProfile.orgType || "for-profit", // 使用正确的默认值
         Description: userProfile.mission_statement || "",
         "Target Audience": userProfile.target_audience || "",
         "Organization looking 1":
@@ -275,17 +279,11 @@ async function findMatchesUsingExternalAPI(userProfile) {
       },
       userId: userProfile.userId,
       location:
-        userProfile.partnerSearch?.location ||
+        userProfile.location?.city?.toLowerCase() ||
         userProfile.searchPreferences?.location ||
         "seattle",
-      organizationType:
-        userProfile.orgType ||
-        userProfile.partnerSearch?.organizationType ||
-        "nonprofit",
-      partnershipGoal:
-        userProfile.partnerDescription ||
-        userProfile.partnerSearch?.partnershipGoal ||
-        "",
+      organizationType: userProfile.orgType || "for-profit", // 使用正确的默认值
+      partnershipGoal: userProfile.partnerDescription || "",
     };
 
     console.log(`请求参数: ${JSON.stringify(requestBody)}`);
@@ -304,6 +302,7 @@ async function findMatchesUsingExternalAPI(userProfile) {
       error.response ? error.response.data : error
     );
 
+    // 使用模拟数据作为回退
     return {
       status: "success",
       matching_results: {
