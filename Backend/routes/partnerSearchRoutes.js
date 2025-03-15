@@ -257,14 +257,12 @@ async function findMatchesUsingPythonScript(userProfile) {
 // 使用外部API进行匹配
 async function findMatchesUsingExternalAPI(userProfile) {
   try {
-    // 获取外部API URL，如果未设置则使用默认值
     const apiUrl =
       process.env.EXTERNAL_MATCH_API_URL ||
       "https://causeconnect-api.onrender.com/test/complete-matching-process";
 
     console.log(`调用外部匹配API: ${apiUrl}`);
 
-    // 准备请求参数
     const requestBody = {
       userId: userProfile.userId,
       location: userProfile.partnerSearch?.location || "seattle",
@@ -275,7 +273,6 @@ async function findMatchesUsingExternalAPI(userProfile) {
 
     console.log(`请求参数: ${JSON.stringify(requestBody)}`);
 
-    // 使用axios替代fetch
     const response = await axios.post(apiUrl, requestBody, {
       headers: {
         "Content-Type": "application/json",
@@ -285,8 +282,11 @@ async function findMatchesUsingExternalAPI(userProfile) {
     return response.data;
   } catch (error) {
     console.error("调用外部匹配API失败:", error.message);
+    console.error(
+      "错误详细信息:",
+      error.response ? error.response.data : error
+    );
 
-    // 使用模拟数据作为回退
     return {
       status: "success",
       matching_results: {
