@@ -23,9 +23,14 @@ def match_organizations(name, org_type, description, target_audience, preferred_
             json=example_data
         )
         data = response.json()
+        print("API响应状态码:", response.status_code)
+        print("API响应头:", response.headers)
+        print("API响应体:", json.dumps(data, indent=2))
         return data
     except Exception as error:
         print("Error:", error, file=sys.stderr)
+        print("调用外部匹配API失败:", error.message)
+        print("错误详情:", json.dumps(error, default=str, indent=2))
         return {"error": str(error)}
 
 # 如果直接运行脚本，则使用命令行参数或示例数据进行测试
@@ -64,4 +69,7 @@ if __name__ == "__main__":
         preferred_org_type,
         partnership_description
     )
-    print("Response:", json.dumps(result, indent=2)) 
+    print("Response:", json.dumps(result, indent=2))
+
+    console.log(`用户ID: ${userId}`);
+    console.log(`匹配参数: ${JSON.stringify(matchParams)}`); 
