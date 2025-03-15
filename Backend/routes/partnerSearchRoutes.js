@@ -264,11 +264,28 @@ async function findMatchesUsingExternalAPI(userProfile) {
     console.log(`调用外部匹配API: ${apiUrl}`);
 
     const requestBody = {
+      user_org: {
+        Name: userProfile.name || "Unknown Organization",
+        Type: userProfile.orgType || "nonprofit",
+        Description: userProfile.mission_statement || "",
+        "Target Audience": userProfile.target_audience || "",
+        "Organization looking 1":
+          userProfile.searchPreferences?.preferredOrgType || "nonprofit",
+        "Organization looking 2": userProfile.partnerDescription || "",
+      },
       userId: userProfile.userId,
-      location: userProfile.partnerSearch?.location || "seattle",
+      location:
+        userProfile.partnerSearch?.location ||
+        userProfile.searchPreferences?.location ||
+        "seattle",
       organizationType:
-        userProfile.partnerSearch?.organizationType || "nonprofit",
-      partnershipGoal: userProfile.partnerSearch?.partnershipGoal || "",
+        userProfile.orgType ||
+        userProfile.partnerSearch?.organizationType ||
+        "nonprofit",
+      partnershipGoal:
+        userProfile.partnerDescription ||
+        userProfile.partnerSearch?.partnershipGoal ||
+        "",
     };
 
     console.log(`请求参数: ${JSON.stringify(requestBody)}`);
