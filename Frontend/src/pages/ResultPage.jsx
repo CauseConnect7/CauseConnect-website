@@ -3,9 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import ForceGraph2D from "react-force-graph-2d";
 import { useAuth } from "../context/AuthContext";
 import logo from "../images/logo.svg";
-
-// API 基础 URL
-const API_BASE_URL = "http://localhost:3001/api";
+import API_BASE_URL from "../config";
 
 export default function ResultPage() {
   const navigate = useNavigate();

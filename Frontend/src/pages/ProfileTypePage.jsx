@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import heroImage from "../images/hero4.jpg"; // 导入相同的背景图片
+import API_BASE_URL from "../config";
 
 export default function ProfileTypePage() {
   const navigate = useNavigate();
@@ -35,7 +37,7 @@ export default function ProfileTypePage() {
       }
 
       // 调用API保存组织类型
-      const response = await fetch("http://localhost:3001/api/profile/type", {
+      const response = await fetch(`${API_BASE_URL}/profile/type`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

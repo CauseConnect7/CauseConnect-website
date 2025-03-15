@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import heroImage from "../images/hero-bg.jpg";
+import API_BASE_URL from "../config";
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
@@ -8,13 +9,16 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3001/api/auth/register", {
+      setIsLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,6 +44,8 @@ export default function Register() {
     } catch (networkError) {
       console.error("❌ 网络错误:", networkError);
       setError("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 

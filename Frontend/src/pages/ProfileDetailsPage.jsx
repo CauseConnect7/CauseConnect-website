@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import heroImage from "../images/hero4.jpg";
+import API_BASE_URL from "../config";
 
 const NONPROFIT_INDUSTRIES = {
   "Education & Youth Development": [
@@ -534,7 +535,7 @@ export default function ProfileDetailsPage() {
       const token = localStorage.getItem("token");
       console.log("使用的token:", token);
 
-      const response = await fetch("http://localhost:3001/api/profile", {
+      const response = await fetch(`${API_BASE_URL}/profile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

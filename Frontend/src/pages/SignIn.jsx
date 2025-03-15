@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import heroImage from "../images/hero-bg.jpg";
+import API_BASE_URL from "../config";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ export default function SignIn() {
 
     try {
       console.log("2. 准备发送登录请求...", { email, password });
-      const response = await fetch("http://localhost:3001/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +73,7 @@ export default function SignIn() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3001/auth/google";
+    window.location.href = `${API_BASE_URL.replace("/api", "")}/auth/google`;
   };
 
   return (

@@ -1,3 +1,5 @@
+import API_BASE_URL from "../config";
+
 const findPartners = async () => {
   try {
     // 获取表单数据
@@ -9,10 +11,11 @@ const findPartners = async () => {
 
     console.log("发送搜索请求:", searchData);
 
-    const response = await fetch("http://localhost:3001/api/partners/find", {
+    const response = await fetch(`${API_BASE_URL}/partners/find`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(searchData),
     });

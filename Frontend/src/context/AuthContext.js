@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config";
 
 const AuthContext = createContext(null);
 
@@ -10,9 +11,15 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   // 检查用户个人资料状态
-  const checkProfileStatus = async (token) => {
+  const checkProfileStatus = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/profile/status", {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setProfileComplete(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/profile/status`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -21,12 +28,11 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        return data.data && data.data.isProfileComplete;
+        setProfileComplete(data.data && data.data.isProfileComplete);
       }
-      return false;
     } catch (error) {
       console.error("❌ 检查个人资料状态失败:", error);
-      return false;
+      setProfileComplete(false);
     }
   };
 
@@ -40,8 +46,7 @@ export const AuthProvider = ({ children }) => {
           setUser(payload);
 
           // 检查用户个人资料状态
-          const isComplete = await checkProfileStatus(token);
-          setProfileComplete(isComplete);
+          await checkProfileStatus();
         } catch (error) {
           console.error("❌ Token 解析失败:", error);
           localStorage.removeItem("token");
@@ -77,11 +82,10 @@ export const AuthProvider = ({ children }) => {
       console.log("AuthContext: 用户状态已更新");
 
       // 检查用户个人资料状态
-      const isComplete = await checkProfileStatus(token);
-      setProfileComplete(isComplete);
-      console.log("AuthContext: 个人资料状态已更新:", isComplete);
+      await checkProfileStatus();
+      console.log("AuthContext: 个人资料状态已更新:", profileComplete);
 
-      return isComplete;
+      return profileComplete;
     } catch (error) {
       console.error("❌ Token 处理错误:", error);
       localStorage.removeItem("token");

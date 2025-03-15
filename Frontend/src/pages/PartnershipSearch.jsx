@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import heroImage from "../images/hero2.jpg";
 import { useAuth } from "../context/AuthContext";
-
-// API 基础 URL
-const API_BASE_URL = "http://localhost:3001/api";
+import API_BASE_URL from "../config";
 
 const PartnershipSearch = () => {
   const navigate = useNavigate();

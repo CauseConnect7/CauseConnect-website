@@ -44,7 +44,13 @@ const app = express();
 // 中间件配置
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3002"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3002",
+      "https://cause-connect-website-15eldiroc.vercel.app",
+      "https://cause-connect-website.vercel.app",
+      "https://causesconnect.com",
+    ],
     credentials: true,
   })
 );
