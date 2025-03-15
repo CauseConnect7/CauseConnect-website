@@ -394,9 +394,11 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
           _id:
             match.organization?.id || new mongoose.Types.ObjectId().toString(), // 使用 new 关键字创建 ObjectId
           matchCategory:
-            match.evaluation?.is_match === true
+            match.similarity_score >= 0.8
               ? "✅ Good Match"
-              : "🟡 Average Match", // 根据评估结果设置匹配类别
+              : match.similarity_score >= 0.6
+              ? "🟡 Average Match"
+              : "🔵 Potential Match", // 根据相似度分数设置匹配类别，不再依赖is_match
           matchScore: Math.round(match.similarity_score * 100) || 80, // 使用相似度分数
           Name: match.organization?.name || "Unknown Organization",
           Description: match.organization?.description || "",
