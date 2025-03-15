@@ -270,7 +270,7 @@ async function findMatchesUsingExternalAPI(userProfile) {
     const requestBody = {
       user_org: {
         Name: userProfile.name || "Unknown Organization",
-        Type: userProfile.orgType || "for-profit", // 使用正确的默认值
+        Type: userProfile.orgType || "for-profit",
         Description: userProfile.mission_statement || "",
         "Target Audience": userProfile.target_audience || "",
         "Organization looking 1":
@@ -279,10 +279,11 @@ async function findMatchesUsingExternalAPI(userProfile) {
       },
       userId: userProfile.userId,
       location:
-        userProfile.location?.city?.toLowerCase() ||
         userProfile.searchPreferences?.location ||
-        "seattle",
-      organizationType: userProfile.orgType || "for-profit", // 使用正确的默认值
+        (userProfile.location?.city
+          ? userProfile.location.city.toLowerCase()
+          : "seattle"),
+      organizationType: userProfile.orgType || "for-profit",
       partnershipGoal: userProfile.partnerDescription || "",
     };
 
@@ -302,7 +303,6 @@ async function findMatchesUsingExternalAPI(userProfile) {
       error.response ? error.response.data : error
     );
 
-    // 使用模拟数据作为回退
     return {
       status: "success",
       matching_results: {
