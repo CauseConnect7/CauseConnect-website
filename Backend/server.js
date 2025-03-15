@@ -44,14 +44,27 @@ const app = express();
 // 中间件配置
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3002",
-      "https://cause-connect-website-15eldiroc.vercel.app",
-      "https://cause-connect-website.vercel.app",
-      "https://causesconnect.com",
-    ],
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3002",
+        "https://cause-connect-website-15eldiroc.vercel.app",
+        "https://cause-connect-website.vercel.app",
+        "https://causesconnect.com",
+      ];
+
+      // 允许没有origin的请求（如移动应用或Postman）
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS不允许"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
@@ -129,6 +142,11 @@ app.get("/", (req, res) => {
   res.json({ message: "API 服务器运行正常" });
 });
 
+// 测试路由
+app.get("/api/test", (req, res) => {
+  res.json({ message: "API 测试路由正常工作", code: 0 });
+});
+
 // 404 处理
 app.use((req, res) => {
   res.status(404).json({
@@ -160,10 +178,6 @@ process.on("unhandledRejection", (err) => {
 process.on("uncaughtException", (err) => {
   console.error("未捕获的异常:", err);
   process.exit(1);
-});
-
-app.get("/api/test", (req, res) => {
-  res.json({ message: "API is working!" });
 });
 
 console.log(
