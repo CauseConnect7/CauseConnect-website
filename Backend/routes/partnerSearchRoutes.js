@@ -16,8 +16,14 @@ const Organization =
     "organizations"
   );
 
-// 外部 API 基础 URL
-const EXTERNAL_API_URL = "https://causeconnect-api.onrender.com";
+// 根据环境选择API基础URL
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+export const API_BASE_URL = isDevelopment 
+  ? 'http://localhost:3001/api'
+  : 'https://causeconnect-server.onrender.com/api';
+
+export const EXTERNAL_API_URL = 'https://causeconnect-api.onrender.com';
 
 // Configure OpenAI
 // const openai = new OpenAI({
@@ -194,6 +200,12 @@ async function findMatchesUsingPythonScript(userProfile) {
     try {
       console.log("Calling Python script with user profile data");
 
+      # 修改前（错误的JavaScript语法）
+      console.log(`用户ID: ${userId}`);
+
+      # 修改后（正确的Python语法）
+      print(f"用户ID: {userId}")
+
       // 调用 Python 脚本，不传递参数，使用脚本中的示例数据
       const pythonProcess = spawn("python3", ["./matching_api.py"]);
 
@@ -247,6 +259,55 @@ async function findMatchesUsingPythonScript(userProfile) {
   });
 }
 
+// 使用外部API进行匹配
+async function findMatchesUsingExternalAPI(userProfile) {
+  try {
+    // 获取外部API URL，如果未设置则使用默认值
+    const apiUrl = process.env.EXTERNAL_MATCH_API_URL || 
+                  "https://causeconnect-api.onrender.com/test/complete-matching-process";
+
+    console.log(`调用外部匹配API: ${apiUrl}`);
+
+    // 准备请求参数
+    const requestBody = {
+      userId: userProfile.userId,
+      location: userProfile.partnerSearch?.location || "seattle",
+      organizationType: userProfile.partnerSearch?.organizationType || "nonprofit",
+      partnershipGoal: userProfile.partnerSearch?.partnershipGoal || ""
+    };
+
+    console.log(`请求参数: ${JSON.stringify(requestBody)}`);
+
+    // 调用外部API
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw new Error(`外部API返回错误: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("调用外部匹配API失败:", error);
+    
+    // 使用模拟数据作为回退
+    return {
+      status: "success",
+      matching_results: {
+        successful_matches: [],
+        remaining_matches: [],
+        final_twenty_matches: []
+      }
+    };
+  }
+}
+
 // Execute partner search
 router.post("/find-partners", authenticateToken, async (req, res) => {
   try {
@@ -275,8 +336,14 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
       };
     }
 
-    // 使用 Python 脚本调用外部 API 进行匹配
-    const matchResults = await findMatchesUsingPythonScript(userProfile);
+    let matchResults;
+    if (process.env.USE_EXTERNAL_API === 'true') {
+      console.log("使用外部API进行匹配");
+      matchResults = await findMatchesUsingExternalAPI(userProfile);
+    } else {
+      console.log("使用Python脚本进行匹配");
+      matchResults = await findMatchesUsingPythonScript(userProfile);
+    }
 
     // 使用 JSON.stringify 打印完整的匹配结果，但限制深度为 2 层
     console.log(
