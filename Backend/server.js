@@ -44,14 +44,35 @@ const app = express();
 // 中间件配置
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3002",
-      "https://cause-connect-website-15eldiroc.vercel.app",
-      "https://cause-connect-website-kz9uo3014.vercel.app",
-      "https://cause-connect-website.vercel.app",
-      "https://causesconnect.com",
-    ],
+    origin: function (origin, callback) {
+      // 允许没有origin的请求（如移动应用或Postman）
+      if (!origin) return callback(null, true);
+
+      // 允许本地开发环境
+      if (origin.match(/http:\/\/localhost:[0-9]+/)) {
+        return callback(null, true);
+      }
+
+      // 允许Vercel预览域名
+      if (
+        origin.match(/https:\/\/cause-connect-website-[a-z0-9]+\.vercel\.app/)
+      ) {
+        return callback(null, true);
+      }
+
+      // 允许主域名
+      const allowedDomains = [
+        "https://cause-connect-website.vercel.app",
+        "https://causesconnect.com",
+      ];
+
+      if (allowedDomains.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // 拒绝其他域名
+      callback(new Error("CORS不允许"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -63,17 +84,28 @@ app.options("*", cors());
 
 // 添加自定义CORS头中间件
 app.use((req, res, next) => {
-  const allowedOrigins = [
-    "http://localhost:3000",
-    "http://localhost:3002",
-    "https://cause-connect-website-15eldiroc.vercel.app",
-    "https://cause-connect-website-kz9uo3014.vercel.app",
+  const origin = req.headers.origin;
+
+  // 允许本地开发环境
+  if (origin && origin.match(/http:\/\/localhost:[0-9]+/)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  // 允许Vercel预览域名
+  if (
+    origin &&
+    origin.match(/https:\/\/cause-connect-website-[a-z0-9]+\.vercel\.app/)
+  ) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  // 允许主域名
+  const allowedDomains = [
     "https://cause-connect-website.vercel.app",
     "https://causesconnect.com",
   ];
 
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
+  if (origin && allowedDomains.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
 
