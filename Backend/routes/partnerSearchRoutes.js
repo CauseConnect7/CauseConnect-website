@@ -268,37 +268,18 @@ async function findMatchesUsingExternalAPI(userProfile) {
       ? userProfile.toObject()
       : JSON.parse(JSON.stringify(userProfile));
 
-    // 打印完整的用户资料以便调试
-    console.log("完整的用户资料:", JSON.stringify(userProfileObj, null, 2));
-
-    // 打印关键字段的值
-    console.log("name字段:", userProfileObj.name);
-    console.log("mission_statement字段:", userProfileObj.mission_statement);
-    console.log("target_audience字段:", userProfileObj.target_audience);
-    console.log("partnerDescription字段:", userProfileObj.partnerDescription);
-
-    // 构建更完整的请求参数，确保所有字段都有值
+    // 构建与API期望格式一致的请求参数
     const requestBody = {
-      user_org: {
-        Name: userProfileObj.name || "Unknown Organization",
-        Type: userProfileObj.orgType || "for-profit",
-        Description: userProfileObj.mission_statement || "",
-        "Target Audience": userProfileObj.target_audience || "",
-        "Organization looking 1":
-          userProfileObj.searchPreferences?.preferredOrgType || "nonprofit",
-        "Organization looking 2": userProfileObj.partnerDescription || "",
-      },
-      userId: userProfileObj.userId,
-      location:
-        userProfileObj.searchPreferences?.location ||
-        (userProfileObj.location?.city
-          ? userProfileObj.location.city.toLowerCase()
-          : "seattle"),
-      organizationType: userProfileObj.orgType || "for-profit",
-      partnershipGoal: userProfileObj.partnerDescription || "",
+      Name: userProfileObj.name || "Unknown Organization",
+      Type: userProfileObj.orgType || "for-profit",
+      Description: userProfileObj.mission_statement || "",
+      "Target Audience": userProfileObj.target_audience || "",
+      "Organization looking 1":
+        userProfileObj.searchPreferences?.preferredOrgType || "nonprofit",
+      "Organization looking 2": userProfileObj.partnerDescription || "",
     };
 
-    console.log(`请求参数: ${JSON.stringify(requestBody)}`);
+    console.log(`修改后的请求参数: ${JSON.stringify(requestBody)}`);
 
     const response = await axios.post(apiUrl, requestBody, {
       headers: {
@@ -315,7 +296,8 @@ async function findMatchesUsingExternalAPI(userProfile) {
     );
 
     return {
-      status: "success",
+      status: "error",
+      message: "API调用失败，请稍后再试",
       matching_results: {
         successful_matches: [],
         remaining_matches: [],
