@@ -389,27 +389,38 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
       Array.isArray(matchResults.matching_results.final_twenty_matches)
     ) {
       formattedResults = matchResults.matching_results.final_twenty_matches.map(
-        (match) => ({
-          ...match,
-          _id:
-            match.organization?.id || new mongoose.Types.ObjectId().toString(), // 使用 new 关键字创建 ObjectId
-          matchCategory:
-            match.similarity_score >= 0.8
-              ? "✅ Good Match"
-              : match.similarity_score >= 0.6
-              ? "🟡 Average Match"
-              : "🔵 Potential Match", // 根据相似度分数设置匹配类别，不再依赖is_match
-          matchScore: Math.round(match.similarity_score * 100) || 80, // 使用相似度分数
-          Name: match.organization?.name || "Unknown Organization",
-          Description: match.organization?.description || "",
-          City: match.organization?.city || location || "",
-          State: match.organization?.state || "",
-          Organization_Type: match.organization?.type || organizationType,
-          linkedin_url: match.organization?.linkedin_url || "",
-          URL: match.organization?.url || "",
-          linkedin_industries: match.organization?.industries || "",
-          linkedin_specialities: match.organization?.specialities || "",
-        })
+        (match) => {
+          // 打印原始匹配对象，帮助调试
+          console.log("处理匹配对象:", JSON.stringify(match, null, 2));
+
+          return {
+            ...match,
+            _id:
+              match.organization?.id ||
+              new mongoose.Types.ObjectId().toString(),
+            matchCategory:
+              match.similarity_score >= 0.8
+                ? "✅ Good Match"
+                : match.similarity_score >= 0.6
+                ? "🟡 Average Match"
+                : "🔵 Potential Match", // 根据相似度分数设置匹配类别
+            matchScore: Math.round((match.similarity_score || 0.8) * 100), // 确保有默认值
+            Name: match.organization?.name || "Unknown Organization",
+            Description: match.organization?.description || "",
+            City: match.organization?.city || location || "",
+            State: match.organization?.state || "",
+            Organization_Type:
+              match.organization?.linkedin_type ||
+              match.organization?.type ||
+              organizationType,
+            linkedin_url: match.organization?.linkedin_url || "",
+            URL: match.organization?.url || "",
+            // 确保使用正确的字段名
+            linkedin_industries: match.organization?.linkedin_industries || "",
+            linkedin_specialities:
+              match.organization?.linkedin_specialities || "",
+          };
+        }
       );
     }
 
@@ -418,6 +429,15 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
     if (formattedResults.length > 0) {
       console.log(
         "第一个匹配结果示例:",
+        JSON.stringify(formattedResults[0], null, 2)
+      );
+    }
+
+    // 在返回结果前添加调试信息
+    console.log("最终返回的结果数量:", formattedResults.length);
+    if (formattedResults.length > 0) {
+      console.log(
+        "第一个结果示例:",
         JSON.stringify(formattedResults[0], null, 2)
       );
     }
