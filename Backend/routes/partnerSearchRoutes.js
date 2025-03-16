@@ -368,12 +368,12 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
     // 打印最终的 20 个匹配结果中的前 3 个
     if (
       matchResults.matching_results &&
-      matchResults.matching_results.final_twenty_matches
+      matchResults.matching_results.successful_matches
     ) {
       console.log(
         "最终匹配结果前 3 个:",
         JSON.stringify(
-          matchResults.matching_results.final_twenty_matches.slice(0, 3),
+          matchResults.matching_results.successful_matches.slice(0, 3),
           null,
           2
         )
@@ -385,10 +385,10 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
     if (
       matchResults &&
       matchResults.matching_results &&
-      matchResults.matching_results.final_twenty_matches &&
-      Array.isArray(matchResults.matching_results.final_twenty_matches)
+      matchResults.matching_results.successful_matches &&
+      Array.isArray(matchResults.matching_results.successful_matches)
     ) {
-      formattedResults = matchResults.matching_results.final_twenty_matches.map(
+      formattedResults = matchResults.matching_results.successful_matches.map(
         (match) => {
           // 打印原始匹配对象，帮助调试
           console.log("处理匹配对象:", JSON.stringify(match, null, 2));
@@ -466,7 +466,7 @@ router.post("/find-partners", authenticateToken, async (req, res) => {
             remainingMatchesCount:
               matchResults.matching_results?.remaining_matches?.length || 0,
             finalMatchesCount:
-              matchResults.matching_results?.final_twenty_matches?.length || 0,
+              matchResults.matching_results?.successful_matches?.length || 0,
           },
         },
       },
