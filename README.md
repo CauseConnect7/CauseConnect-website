@@ -1,3 +1,4 @@
+liveDemo: https://cause-connect-website-cn8u7yj7v.vercel.app/
 
 # Organization Matching System
 
@@ -25,7 +26,7 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret  
 GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback  
 FRONTEND_URL=http://localhost:3000  
-MONGO_URI=mongodb+srv://Cluster13662@cluster13662.s1t3w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster13662  
+MONGO_URI=your-mongodb  
 MONGODB_DB_NAME=User  
 MONGODB_COLLECTION_AUTH=auth  
 MONGODB_COLLECTION_PROFILE=profile  
